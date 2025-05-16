@@ -10,12 +10,17 @@ def handle_info_message(topic, payload):
                     id_pond, sensor_id,
                     config["temperatura_minima"],
                     config["temperatura_maxima"],
-                    {"refrigerador": config["id_refrigerador"], "calentador": config["id_calentador"]}
+                    {
+                        "CAL": config["id_calentador"],
+                        "ENF": config["id_refrigerador"]
+                    }
                 )
             elif "nh4no3_maximo" in config:
                 set_sensor_threshold(
                     id_pond, sensor_id,
                     config["nh4no3_minimo"],
                     config["nh4no3_maximo"],
-                    {"bomba": config["id_bomba"]}
+                    {
+                        "BR": config["id_bomba"]
+                    }
                 )
