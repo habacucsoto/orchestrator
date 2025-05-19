@@ -39,18 +39,25 @@ lock = Lock()
 
 def update_heartbeat(id_pond, id_device):
     with lock:
+        print(f"[HEARTBEAT RECIBIDO] {id_pond}/{id_device}")
         heartbeat_timestamps[f"{id_pond}/{id_device}"] = time.time()
 
 def monitor_heartbeats():
+    print("[MONITOR] Iniciando monitoreo de heartbeats...")
     while True:
         now = time.time()
         with lock:
             keys = list(heartbeat_timestamps.keys())
+        
+        print(f"[MONITOR] Revisión de {len(keys)} dispositivos...")
 
         for key in keys:
             last = heartbeat_timestamps.get(key)
             if last is None:
                 continue
+
+            diferencia = now - last
+            print(f"[DEBUG] {key}: diferencia={diferencia:.2f}s")
 
             id_pond, id_device = key.split("/")
             sensores = pond_data.get(id_pond, {})
@@ -67,12 +74,14 @@ def monitor_heartbeats():
 
             # Eliminar timestamp si el dispositivo ya no existe
             if tipo_dispositivo is None:
+                print(f"[AVISO] Dispositivo ya no está registrado en pond_data: {key}")
                 with lock:
                     heartbeat_timestamps.pop(key, None)
                 continue
 
             # Publicar error si no hay heartbeat reciente
-            if now - last > 15:
+            if diferencia > 5:
                 topic = f"aquanest/{id_pond}/{id_device}/heartbeat/error"
+                print(f"[ERROR HEARTBEAT] Publicado en {topic}")
                 client.publish(topic, "error")
         time.sleep(1)
