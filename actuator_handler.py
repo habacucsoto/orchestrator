@@ -1,6 +1,6 @@
 from mqtt_client import client
 import logging
-from orchestrator.store import get_sensor_info
+from store import get_sensor_info
 
 # Diccionario para hacer seguimiento de respuestas pendientes
 pending_actions = {}
