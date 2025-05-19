@@ -73,15 +73,32 @@ def monitor_heartbeats():
                     break
 
             # Eliminar timestamp si el dispositivo ya no existe
+            # if tipo_dispositivo is None:
+            #     print(f"[AVISO] Dispositivo ya no está registrado en pond_data: {key}")
+            #     with lock:
+            #         heartbeat_timestamps.pop(key, None)
+            #     continue
+
             if tipo_dispositivo is None:
-                print(f"[AVISO] Dispositivo ya no está registrado en pond_data: {key}")
-                with lock:
-                    heartbeat_timestamps.pop(key, None)
+                if diferencia > 5:
+                    print(f"[ERROR HEARTBEAT] Dispositivo no encontrado tras timeout: {key}")
+                    topic = f"aquanest/{id_pond}/{id_device}/heartbeat/error"
+                    client.publish(topic, "error")
+                    with lock:
+                        heartbeat_timestamps.pop(key, None)
+                else:
+                    print(f"[AVISO] Dispositivo {key} no encontrado, esperando timeout...")
                 continue
 
             # Publicar error si no hay heartbeat reciente
+            # if diferencia > 5:
+            #     topic = f"aquanest/{id_pond}/{id_device}/heartbeat/error"
+            #     print(f"[ERROR HEARTBEAT] Publicado en {topic}")
+            #     client.publish(topic, "error")
             if diferencia > 5:
                 topic = f"aquanest/{id_pond}/{id_device}/heartbeat/error"
                 print(f"[ERROR HEARTBEAT] Publicado en {topic}")
                 client.publish(topic, "error")
+                with lock:
+                    heartbeat_timestamps.pop(key, None)
         time.sleep(1)
