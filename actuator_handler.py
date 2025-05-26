@@ -15,9 +15,56 @@ def trigger_action(id_pond, id_sensor, value, actuators):
     max_val = sensor_info["max"]
     sensor_type = "temperatura" if "CAL" in actuators or "ENF" in actuators else "nh4no3"
 
+    # # Determine the desired state for all related actuators
+    # desired_actuator_on = None # The actuator that should be ON
+    # actuators_to_turn_off = [] # List of actuators that should be OFF
+    # is_anomalous = False # Initialize is_anomalous to False
+
+    # if sensor_type == "temperatura":
+    #     cal_actuator = actuators.get("CAL")
+    #     enf_actuator = actuators.get("ENF")
+
+    #     if value < min_val:
+    #         desired_actuator_on = cal_actuator
+    #         if enf_actuator:
+    #             actuators_to_turn_off.append(enf_actuator)
+    #     elif value > max_val:
+    #         desired_actuator_on = enf_actuator
+    #         if cal_actuator:
+    #             actuators_to_turn_off.append(cal_actuator)
+    #     else:
+    #         print(f"Valor de temperatura {value} dentro de umbrales para {id_sensor}")
+    #         # If within range, ensure both are off
+    #         if cal_actuator:
+    #             actuators_to_turn_off.append(cal_actuator)
+    #         if enf_actuator:
+    #             actuators_to_turn_off.append(enf_actuator)
+
+    # elif sensor_type == "nh4no3":
+    #     br_actuator = actuators.get("BR")
+    #     if value > max_val:
+    #         desired_actuator_on = br_actuator
+    #     else:
+    #         print(f"Valor de NH4NO3 {value} dentro de umbrales para {id_sensor}")
+    #         # If within range, ensure it's off
+    #         if br_actuator:
+    #             actuators_to_turn_off.append(br_actuator)
+
+    # # If no actuator needs to be turned on (e.g., within range), just turn off others
+    # if not desired_actuator_on and not actuators_to_turn_off:
+    #     return # No action needed
+
+    # # Publish alert if anomalous
+    # is_anomalous = (desired_actuator_on is not None)
+    # if is_anomalous:
+    #     alert_topic = f"aquanest/{id_pond}/{id_sensor}/alert/anomalous"
+    #     client.publish(alert_topic, str(value))
+    #     print(f"Valor anómalo detectado: {value} en {id_sensor} (estanque {id_pond})")
+
     # Determine the desired state for all related actuators
     desired_actuator_on = None # The actuator that should be ON
     actuators_to_turn_off = [] # List of actuators that should be OFF
+    is_anomalous = False # Initialize is_anomalous to False
 
     if sensor_type == "temperatura":
         cal_actuator = actuators.get("CAL")
@@ -27,13 +74,14 @@ def trigger_action(id_pond, id_sensor, value, actuators):
             desired_actuator_on = cal_actuator
             if enf_actuator:
                 actuators_to_turn_off.append(enf_actuator)
+            is_anomalous = True # It's anomalous if below min
         elif value > max_val:
             desired_actuator_on = enf_actuator
             if cal_actuator:
                 actuators_to_turn_off.append(cal_actuator)
+            is_anomalous = True # It's anomalous if above max
         else:
             print(f"Valor de temperatura {value} dentro de umbrales para {id_sensor}")
-            # If within range, ensure both are off
             if cal_actuator:
                 actuators_to_turn_off.append(cal_actuator)
             if enf_actuator:
@@ -43,18 +91,13 @@ def trigger_action(id_pond, id_sensor, value, actuators):
         br_actuator = actuators.get("BR")
         if value > max_val:
             desired_actuator_on = br_actuator
+            is_anomalous = True # It's anomalous if above max
         else:
             print(f"Valor de NH4NO3 {value} dentro de umbrales para {id_sensor}")
-            # If within range, ensure it's off
             if br_actuator:
                 actuators_to_turn_off.append(br_actuator)
 
-    # If no actuator needs to be turned on (e.g., within range), just turn off others
-    if not desired_actuator_on and not actuators_to_turn_off:
-        return # No action needed
-
     # Publish alert if anomalous
-    is_anomalous = (desired_actuator_on is not None)
     if is_anomalous:
         alert_topic = f"aquanest/{id_pond}/{id_sensor}/alert/anomalous"
         client.publish(alert_topic, str(value))
