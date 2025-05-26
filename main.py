@@ -7,7 +7,7 @@ from actuator_handler import handle_response_message
 import threading
 
 TOPICS = [
-    ("aquanest/+/+/info", 0),
+    ("aquanest/+/info", 0),
     ("aquanest/+/+/data/+", 0),
     ("aquanest/+/delete", 0),
     ("aquanest/+/+/heartbeat", 0),
