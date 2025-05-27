@@ -1,6 +1,6 @@
 import time
 from threading import Lock
-from mqtt_client import client  # Usar el cliente persistente
+from mqtt_client import client  
 from store import pond_data
 
 heartbeat_timestamps = {}
@@ -26,7 +26,7 @@ def monitor_heartbeats():
             id_pond, id_device = key.split("/")
             sensores = pond_data.get(id_pond, {})
 
-            tipo_dispositivo = None  # "sensor", "actuator" o None
+            tipo_dispositivo = None 
 
             for sensor_id, sensor_data in sensores.items():
                 if id_device == sensor_id:

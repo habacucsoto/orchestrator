@@ -25,7 +25,6 @@ def on_message(client, userdata, msg):
         parts = msg.topic.split("/")
         update_heartbeat(parts[1], parts[2])
     elif "/response" in msg.topic:
-        print('suscrito response')
         handle_response_message(msg.topic, msg.payload)
 
 if __name__ == "__main__":

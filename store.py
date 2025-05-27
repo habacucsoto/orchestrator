@@ -1,7 +1,5 @@
-# store.py
 from collections import defaultdict
 
-# Estructura: id_pond -> id_sensor -> {"min": val, "max": val, "actuators": {...}}
 pond_data = defaultdict(dict)
 
 def set_sensor_threshold(id_pond, id_sensor, min_val, max_val, actuators):
